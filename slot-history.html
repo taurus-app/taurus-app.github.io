@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot History - Taurus</title>
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/slot-history.css">
+</head>
+<body>
+    <!-- Background Decorative Elements -->
+    <div class="bg-decoration">
+        <div class="bg-circle bg-circle-1"></div>
+        <div class="bg-circle bg-circle-2"></div>
+        <div class="bg-circle bg-circle-3"></div>
+        <div class="bg-lines">
+            <div class="bg-line bg-line-1"></div>
+            <div class="bg-line bg-line-2"></div>
+            <div class="bg-line bg-line-3"></div>
+        </div>
+    </div>
+    
+    <div class="dashboard-container">
+        <div class="logo-title-bar">
+            <div class="fixed-logo">
+                <img src="assets/images/taurus_logo.png" alt="Taurus Logo">
+            </div>
+            <h1 class="dashboard-title">Slot History</h1>
+        </div>
+        <div class="slot-history-header-row">
+            <div class="card-decoration card-decoration-top"></div>
+            <div class="slot-history-header">
+                <span class="slot-history-vip" id="slotHistoryVip">VIP1</span>
+                <span class="slot-history-amount" id="slotHistoryAmount">0.1BNB</span>
+            </div>
+            <button class="back-btn" id="backBtn">Back</button>
+            <div class="card-decoration card-decoration-bottom"></div>
+        </div>
+        <div class="slot-history-cycle-row">
+            <span class="slot-history-cycle">Cycle <span id="slotHistoryCycle">--</span></span>
+        </div>
+        <div class="slot-history-table-card">
+            <div class="card-decoration card-decoration-top"></div>
+            <div id="slotHistoryTable">
+                <div class="slot-history-row">
+                    <div class="slot-history-slot">--</div>
+                    <div class="slot-history-slot">--</div>
+                    <div class="slot-history-cycle-col">
+                        <div class="slot-history-cycle-icon">&#x21bb;</div>
+                        <div class="slot-history-cycle-num">--</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-decoration card-decoration-bottom"></div>
+        </div>
+    </div>
+    <script src="assets/plugins/bootstrap.bundle.min.js"></script>
+    <script src="assets/plugins/web3.min.js"></script>
+    <script src="assets/abi/abiAddress.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/baseData.js"></script>
+    <script src="js/slot-history.js"></script>
+</body>
+</html> 

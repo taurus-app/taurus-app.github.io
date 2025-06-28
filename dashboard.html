@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taurus Dashboard</title>
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+    <!-- Background Decorative Elements -->
+    <div class="bg-decoration">
+        <div class="bg-circle bg-circle-1"></div>
+        <div class="bg-circle bg-circle-2"></div>
+        <div class="bg-circle bg-circle-3"></div>
+        <div class="bg-lines">
+            <div class="bg-line bg-line-1"></div>
+            <div class="bg-line bg-line-2"></div>
+            <div class="bg-line bg-line-3"></div>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="logo-title-bar">
+            <div class="fixed-logo">
+                <img src="assets/images/taurus_logo.png" alt="Taurus Logo">
+            </div>
+            <h1 class="dashboard-title">Dashboard</h1>
+        </div>
+        <div class="user-info-card card-blur">
+            <div class="card-decoration card-decoration-top"></div>
+            <div class="user-id">
+                <span>ID: <span id="userId">--</span></span>
+                <span class="vip-level" id="vipLevel">VIP--</span>
+                <span class="inviter-id">Invited by ID <span id="inviterId">--</span></span>
+            </div>
+            <div class="wallet-row">
+                <input type="text" id="walletAddress" class="wallet-input" readonly>
+            </div>
+            <div class="partner-row">
+                <span id="partnerCount">My Partners: --</span>
+                <button class="details-btn" id="detailsBtn">Details</button>
+            </div>
+            <div class="card-decoration card-decoration-bottom"></div>
+        </div>
+        <div class="invite-link-card card-blur">
+            <div class="card-decoration card-decoration-top"></div>
+            <div class="invite-title">My Invitation Link</div>
+            <div class="invite-link-row">
+                <span id="inviteLink">https://taurus-dex.github.io/register?invite=--</span>
+                <button class="copy-btn" id="copyInviteBtn"></button>
+            </div>
+            <div class="card-decoration card-decoration-bottom"></div>
+        </div>
+        <div class="slot-section card-blur">
+            <div class="card-decoration card-decoration-top"></div>
+            <div id="slotList"></div>
+            <div class="card-decoration card-decoration-bottom"></div>
+        </div>
+        <div class="legend-section">
+            <div class="legend-row">
+                <span class="legend-dot direct"></span>
+                <span>Direct partner - Direct partner occupying a slot in your level</span>
+            </div>
+            <div class="legend-row">
+                <span class="legend-dot indirect"></span>
+                <span>Overflow from below - Your downline's partner occupying a slot in your level</span>
+            </div>
+            <div class="legend-row">
+                <span class="legend-dot empty"></span>
+                <span>No bonus generated</span>
+            </div>
+        </div>
+    </div>
+    <script src="assets/plugins/bootstrap.bundle.min.js"></script>
+    <script src="assets/plugins/web3.min.js"></script>
+    <script src="assets/abi/abiAddress.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/baseData.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>
