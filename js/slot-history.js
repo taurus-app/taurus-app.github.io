@@ -16,6 +16,20 @@ function formatNumber(num) {
 	return n.toFixed(6).replace(/\.?0+$/, '');
 }
 
+// 截断小数，不四舍五入
+function truncate(num, decimals) {
+	const factor = Math.pow(10, decimals);
+	return Math.floor(Number(num) * factor) / factor;
+}
+
+// 格式化为千分位字符串，保留指定位数小数
+function formatTruncate(num, decimals) {
+	return truncate(num, decimals).toLocaleString(undefined, {
+		minimumFractionDigits: decimals,
+		maximumFractionDigits: decimals
+	});
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
 	// 获取钱包地址
 	let address = '';
@@ -54,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 				window.CONTRACT_ADDRESSES.TAURUS
 			)
 
-			const safeBlockNumber = 20000; // 查询最近2000个区块
+			const safeBlockNumber = 200000; // 查询最近2000个区块
 			const latestBlock = await web3.eth.getBlockNumber();
 			const fromBlock = Math.max(0, latestBlock - safeBlockNumber);
 
@@ -116,8 +130,8 @@ function renderRewardList(rewards) {
 		const formattedTime = formatTimestamp(reward.timestamp);
 		const formattedBNB = window.web3.utils.fromWei(reward.amountBNB, 'ether');
 		const formattedTaurus = window.web3.utils.fromWei(reward.amountMainToken, 'ether');
-		const bnbStr = Number(formattedBNB).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-		const taurusStr = Number(formattedTaurus).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+		const bnbStr = formatTruncate(formattedBNB, 6);
+		const taurusStr = formatTruncate(formattedTaurus, 2);
 		const card = document.createElement('div');
 		card.className = 'reward-card';
 		card.innerHTML = `
