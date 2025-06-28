@@ -4,7 +4,8 @@ let userData = {
 	inviterId: '--',
 	partnerCount: '--',
 	inviteLink: '',
-	slots: [] // 这里后续可链上获取
+	slots: [], // 这里后续可链上获取
+	isBlocked: false
 };
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -12,18 +13,16 @@ document.addEventListener('DOMContentLoaded', async function () {
 	let address = '';
 	if (window.getCurrentAddress) {
 		address = await window.getCurrentAddress();
-		
 		document.getElementById('walletAddress').value = formatAddress(address);
 	}
 
 	// 2. 调用auth判断会员状态
 	if (window.checkMembershipStatus && address) {
-		await window.checkMembershipStatus(address, 'dashboard');
+		window.checkMembershipStatus(address, 'dashboard');
 	}
 
 	// 3. 链上获取用户数据
 	await initializeWeb3AndContract();
-
 	try {
 		if (window.taurusContract && address) {
 			const info = await window.taurusContract.methods.getFullUser(address).call();
@@ -32,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 			userData.inviterId = info.inviterId || '--';
 			userData.partnerCount = info.invitedCount || '--';
 			userData.inviteLink = `https://taurus-dex.github.io/register?invite=${userData.userId}`;
-			// 查询插槽奖励（仅与VIP等级匹配的）
+			userData.isBlocked = info.isBlocked === true || info.isBlocked === 'true'; // 兼容字符串
 			userData.slots = await getUserSlots(userData.userId, userData.vipLevel);
 		}
 	} catch (err) {
@@ -42,8 +41,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 	// 4. 填充数据
 	document.getElementById('userId').textContent = userData.userId;
 	document.getElementById('vipLevel').textContent = 'VIP' + userData.vipLevel;
-	document.getElementById('inviterId').textContent = userData.inviterId;
-	document.getElementById('partnerCount').innerHTML = `My Partners: <span style="font-weight: bold;">${userData.partnerCount}</span>`;
+	document.getElementById('inviterId').textContent = t('dashboard.invitedBy') + ' ' + userData.inviterId;
+	document.getElementById('partnerCount').innerHTML = `${t('partners.myPartners')}: <span style="font-weight: bold;">${userData.partnerCount}</span>`;
 	document.getElementById('inviteLink').textContent = userData.inviteLink;
 
 	// 5. 渲染插槽
@@ -52,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	// 6. 复制邀请链接
 	document.getElementById('copyInviteBtn').onclick = function () {
 		navigator.clipboard.writeText(userData.inviteLink);
-		if (window.showToast) window.showToast('Invite link copied!', 'success');
+		if (window.showToast) window.showToast(t('register.copySuccess'), 'success');
 	};
 
 	// 7. Details按钮跳转到我的伙伴页面
@@ -62,6 +61,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 	// 8. Slot View按钮跳转到slot-history.html
 	const slots = userData.slots;
+	// 在数据填充后调用
+	setTimeout(() => {
+		showDashboardContent();
+	}, 500);
 	document.querySelectorAll('.slot-view-btn').forEach(function (btn, idx) {
 		btn.onclick = function () {
 			// 获取当前slot的VIP等级
@@ -109,6 +112,7 @@ async function getUserSlots(userId, vipLevel) {
 		}
 	} catch (err) {
 		// 全局异常
+		window.showToast && window.showToast(t('dashboard.failed'), 'error');
 	}
 	return slots;
 }
@@ -121,21 +125,38 @@ function formatAddress(address) {
 function renderSlots(slots) {
 	const slotList = document.getElementById('slotList');
 	slotList.innerHTML = '';
-	// 获取当前VIP等级
 	const currentVip = Number(userData.vipLevel);
-	
-	// 渲染1~9级
 	for (let level = 1; level <= 9; level++) {
 		const slot = slots.find(s => s.level === level) || { level, amount: '', unit: 'BNB', slots: [{}, {}, {}] };
 		const isLocked = level > currentVip;
 		const showUpgrade = level === currentVip + 1;
+		const showView = level === 1;
+		let rightContent = '';
+		if (!isLocked) {
+			if (level === currentVip && userData.isBlocked) {
+				// 有View按钮
+				if (showView) {
+					rightContent = `<span class="vip-locked" title="Blocked"><span class="vip-lock-icon">🔐</span></span><button class="slot-view-btn" data-level="${level}">${t('dashboard.view')}</button>`;
+				} else {
+					rightContent = `<span class="vip-locked" title="Blocked"><span class="vip-lock-icon">🔐</span></span>`;
+				}
+			} else {
+				if (showView) {
+					rightContent = `<button class="slot-view-btn" data-level="${level}">${t('dashboard.view')}</button>`;
+				} else if (showUpgrade) {
+					rightContent = `<button class="slot-view-btn upgrade-btn" data-level="${level}">${t('upgrade')}</button>`;
+				}
+			}
+		} else if (showUpgrade) {
+			rightContent = `<button class="slot-view-btn upgrade-btn" data-level="${level}">${t('upgrade')}</button>`;
+		}
 		const slotDiv = document.createElement('div');
 		slotDiv.className = 'slot-group' + (isLocked ? ' card-disabled' : '');
 		slotDiv.innerHTML = `
             <div class="slot-header">
                 <span class="slot-level">VIP${level}</span>
                 <span class="slot-amount">${window.getVipAmount ? window.getVipAmount(level) : ''}BNB</span>
-                ${!isLocked ? `<button class="slot-view-btn" data-level="${level}">View</button>` : (showUpgrade ? `<button class="slot-view-btn upgrade-btn" data-level="${level}">Upgrade</button>` : '')}
+                <span class="slot-header-right">${rightContent}</span>
             </div>
             <div class="slot-circles">
                 ${slot.slots.map((s, idx) => {
@@ -152,7 +173,6 @@ function renderSlots(slots) {
 		slotList.appendChild(slotDiv);
 	}
 	setTimeout(() => {
-		// 按钮事件
 		document.querySelectorAll('.slot-view-btn').forEach(function (btn) {
 			if (btn.classList.contains('upgrade-btn')) {
 				let isUpgrading = false;
@@ -166,7 +186,7 @@ function renderSlots(slots) {
 						window.showToast && window.showToast('Upgrade amount not set', 'error');
 						isUpgrading = false;
 						btn.disabled = false;
-						btn.textContent = 'Upgrade';
+						btn.textContent = t('upgrade');
 						return;
 					}
 					const need = window.getVipAmount(level);
@@ -178,14 +198,14 @@ function renderSlots(slots) {
 						window.showToast && window.showToast('Please connect your wallet.', 'error');
 						isUpgrading = false;
 						btn.disabled = false;
-						btn.textContent = 'Upgrade';
+						btn.textContent = t('upgrade');
 						return;
 					}
 					if (!window.taurusContract) {
 						window.showToast && window.showToast('Contract not initialized.', 'error');
 						isUpgrading = false;
 						btn.disabled = false;
-						btn.textContent = 'Upgrade';
+						btn.textContent = t('upgrade');
 						return;
 					}
 					// 检查BNB余额
@@ -200,14 +220,14 @@ function renderSlots(slots) {
 						window.showToast && window.showToast('Failed to get balance', 'error');
 						isUpgrading = false;
 						btn.disabled = false;
-						btn.textContent = 'Upgrade';
+						btn.textContent = t('upgrade');
 						return;
 					}
 					if (balance < need) {
 						window.showToast && window.showToast('Insufficient balance', 'error');
 						isUpgrading = false;
 						btn.disabled = false;
-						btn.textContent = 'Upgrade';
+						btn.textContent = t('upgrade');
 						return;
 					}
 					// 发起合约升级交易
@@ -218,42 +238,38 @@ function renderSlots(slots) {
 							from: address,
 							value: window.web3.utils.toWei(need.toString(), 'ether')
 						})
-						.on('transactionHash', hash => {
-							window.showToast && window.showToast('Transaction sent, waiting for confirmation...', 'info');
-							btn.textContent = 'Pending...';
-						})
-						.on('receipt', receipt => {
-							window.showToast && window.showToast('Upgrade successful!', 'success');
-							btn.textContent = 'Success!';
-							setTimeout(() => window.location.reload(), 1200);
-						})
-						.on('error', error => {
-							if (error && error.code === 4001) {
-								window.showToast && window.showToast('Transaction rejected by user.', 'error');
-							} else {
-								window.showToast && window.showToast('Upgrade failed: ' + (error && error.message ? error.message : 'Unknown error'), 'error');
-							}
-							isUpgrading = false;
-							btn.disabled = false;
-							btn.textContent = 'Upgrade';
-						});
+							.on('transactionHash', hash => {
+								window.showToast && window.showToast('Transaction sent, waiting for confirmation...', 'info');
+								btn.textContent = 'Pending...';
+							})
+							.on('receipt', receipt => {
+								window.showToast && window.showToast('Upgrade successful!', 'success');
+								btn.textContent = 'Success!';
+								setTimeout(() => window.location.reload(), 1200);
+							})
+							.on('error', error => {
+								if (error && error.code === 4001) {
+									window.showToast && window.showToast('Transaction rejected by user.', 'error');
+								} else {
+									window.showToast && window.showToast('Upgrade failed: ' + (error && error.message ? error.message : 'Unknown error'), 'error');
+								}
+								isUpgrading = false;
+								btn.disabled = false;
+								btn.textContent = t('upgrade');
+							});
 					} catch (err) {
 						window.showToast && window.showToast('Upgrade failed: ' + (err && err.message ? err.message : 'Unknown error'), 'error');
 						isUpgrading = false;
 						btn.disabled = false;
-						btn.textContent = 'Upgrade';
+						btn.textContent = t('upgrade');
 					}
 				};
 				return;
 			} else {
 				btn.onclick = function () {
-					const level = btn.getAttribute('data-level');
-					window.location.href = `slot-history.html?vip=${level}`;
+					window.location.href = 'slot-history.html';
 				};
 			}
-		});
-		document.querySelectorAll('.upgrade-btn').forEach(function (btn) {
-			// 已合并到上面
 		});
 	}, 500);
 } 

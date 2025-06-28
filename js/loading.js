@@ -189,7 +189,8 @@ completionStyles.textContent = `
 document.head.appendChild(completionStyles);
 
 // Initialize loading manager when page loads
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+	await initializeWeb3AndContract();
     // Check if we're on mobile
     if (window.innerWidth > 768) {
         // Redirect to mobile notice if on desktop
@@ -202,8 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Add window resize handler
-window.addEventListener('resize', async() => {
-    await initializeWeb3AndContract();
+window.addEventListener('resize', async () => {
+	await initializeWeb3AndContract();
     if (window.innerWidth > 768) {
         window.location.href = 'mobile-notice.html';
     }

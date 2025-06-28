@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', async function () {
 	await initializeWeb3AndContract();
-
+	
 	// 兼容新版MetaMask，确保window.web3被正确初始化
 	if (window.ethereum && typeof window.Web3 !== 'undefined') {
 		window.web3 = new Web3(window.ethereum);
@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	const registerBtn = document.getElementById('registerBtn');
 
 	// 注册所需BNB（可后续支持合约读取）
+	// todo change register bnb
 	const REGISTER_BNB = 0.001;
 
 	// 检查URL参数，自动填充邀请人ID
@@ -38,17 +39,14 @@ document.addEventListener('DOMContentLoaded', async function () {
 	async function updateWalletAddress() {
 		if (window.getCurrentAddress) {
 			const addr = await window.getCurrentAddress();
-			
 			walletInput.value = formatAddress(addr || '');
 			if (addr) {
 				getBNBBalance(addr, balanceSpan);
 				if (window.checkMembershipStatus) {
-					setTimeout(() => {
-						window.checkMembershipStatus(addr, 'register');
-					}, 500);
+					window.checkMembershipStatus(addr, 'register');
 				}
 			} else {
-				balanceSpan.textContent = '0.0 BNB';
+				balanceSpan.textContent = t('availableBalance') + ': 0.0 BNB';
 			}
 		}
 	}
@@ -158,9 +156,9 @@ function getBNBBalance(address, balanceSpan) {
 	window.web3.eth.getBalance(address)
 		.then(balanceWei => {
 			const balance = window.web3.utils.fromWei(balanceWei, 'ether');
-			balanceSpan.textContent = parseFloat(balance).toFixed(4) + ' BNB';
+			balanceSpan.textContent = t('availableBalance') + ': ' + parseFloat(balance).toFixed(4) + ' BNB';
 		})
 		.catch(() => {
-			balanceSpan.textContent = '0.0 BNB';
+			balanceSpan.textContent = t('availableBalance') + ': 0.0 BNB';
 		});
 }

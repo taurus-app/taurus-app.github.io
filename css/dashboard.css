@@ -6,7 +6,7 @@ html, body {
     margin: 0;
     padding: 0;
     font-family: 'Montserrat', 'Segoe UI', 'Arial', sans-serif;
-    background: #0C0E14 url('../assets/images/background.png') no-repeat center center fixed;
+    background: #0C0E14 url('../assets/images/background.jpg') no-repeat center center fixed;
     background-size: cover;
     color: #FAF6F6;
     overflow-x: hidden;
@@ -742,6 +742,9 @@ body::before {
 .card-disabled div span {
     opacity: 0.5;
 }
+.card-disabled .slot-header-right {
+    opacity: 1;
+}
 
 .slot-dot.disabled {
     opacity: 0.5;
@@ -838,4 +841,23 @@ body::before {
         rgba(240, 185, 11, 0.1) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
+}
+
+.vip-locked {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+    vertical-align: middle;
+}
+.vip-lock-icon {
+    color: #F0B90B;
+    font-size: 1.3rem;
+    filter: drop-shadow(0 0.1rem 0.2rem rgba(240,185,11,0.3));
+    margin-right: 0.1rem;
+}
+.slot-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
 } 

@@ -1,25 +1,34 @@
-function getQueryParam(name) {
-	const url = new URL(window.location.href);
-	return url.searchParams.get(name);
+// 时间格式化函数
+function formatTimestamp(timestamp) {
+	const date = new Date(timestamp * 1000); // 转换为毫秒
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	const hours = String(date.getHours()).padStart(2, '0');
+	const minutes = String(date.getMinutes()).padStart(2, '0');
+	return `${month}-${day} ${hours}:${minutes}`;
+}
+
+// 格式化数字显示
+function formatNumber(num) {
+	if (!num || num === '0') return '0';
+	const n = parseFloat(num);
+	if (n < 0.001) return n.toExponential(3);
+	return n.toFixed(6).replace(/\.?0+$/, '');
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-	await initializeWeb3AndContract(false);
 	// 获取钱包地址
 	let address = '';
 	if (window.getCurrentAddress) {
 		address = await window.getCurrentAddress();
 	}
+
+	await initializeWeb3AndContract();
+
 	// 调用auth判断会员状态
 	if (window.checkMembershipStatus && address) {
 		window.checkMembershipStatus(address, 'slot-history');
 	}
-
-	
-
-	// 获取VIP等级参数
-	const vipParam = getQueryParam('vip');
-	let vipLevel = vipParam ? parseInt(vipParam) : 1;
 
 	// 获取用户ID
 	let userId = null;
@@ -31,83 +40,106 @@ document.addEventListener('DOMContentLoaded', async function () {
 	} catch (e) { }
 
 	// 查询历史奖励事件
-	let slotHistoryRows = [];
-	let cycle = 1;
-	 // Load contract ABI
-        const response = await fetch('assets/abi/tauruabi.json');
-        const taurusABI = await response.json();
+	let rewards = [];
+	// Load contract ABI
+	const response = await fetch('assets/abi/tauruabi.json');
+	const taurusABI = await response.json();
 	try {
 		if (window.taurusContract && userId) {
-			// const web3 = window.web3;
-			const web3 = new Web3("https://rpc.ankr.com/bsc/2bd6c0010236463db32d50c26a7a5efb5cbcfcc799d5d7ea4b380a4d258d8e1a"); 
-			let taurusContract = new web3.eth.Contract(
+			// 使用Web3实例查询事件
+			// todo change rpc
+			const web3 = new Web3("https://rpc.ankr.com/bsc/2bd6c0010236463db32d50c26a7a5efb5cbcfcc799d5d7ea4b380a4d258d8e1a");
+			const taurusContract = new web3.eth.Contract(
 				taurusABI,
 				window.CONTRACT_ADDRESSES.TAURUS
-			);
-			const latestBlock = await web3.eth.getBlockNumber();
-			const fromBlock = Math.max(0, latestBlock - 5000);
-			const step = 5001;
+			)
 
-			for (let start = fromBlock; start <= latestBlock; start += step) {
-				const end = Math.min(start + step - 1, latestBlock);
-				// 查询Notify事件（可根据合约实际事件名调整）
-				const events = await taurusContract.getPastEvents('Notify', {
-					filter: {
-						fromUserId: userId
-					},
-					fromBlock: start,
-					toBlock: end
-				});
-				console.log(events);
-				
-				// 解析事件数据，按每3个一行分组
-				let row = [];
-				for (let i = 0; i < events.length; i++) {
-					const ev = events[i];
-					row.push({ type: (i % 3 === 2 ? 'cycle' : 'normal'), id: ev.returnValues.toUserId });
-					if (row.length === 3) {
-						slotHistoryRows.push(row);
-						row = [];
-					}
-				}
-				if (row.length > 0) slotHistoryRows.push(row);
-				cycle = slotHistoryRows.length;
-			}
+			const safeBlockNumber = 20000; // 查询最近2000个区块
+			const latestBlock = await web3.eth.getBlockNumber();
+			const fromBlock = Math.max(0, latestBlock - safeBlockNumber);
+
+			// 查询Notify事件
+			const events = await taurusContract.getPastEvents('Notify', {
+				filter: {
+					fromUserId: userId
+				},
+				fromBlock: fromBlock,
+				toBlock: latestBlock
+			});
+
+			// 解析事件数据
+			rewards = events.map(ev => {
+				const returnValues = ev.returnValues;
+				return {
+					fromUserId: returnValues.fromUserId,
+					toUserId: returnValues.toUserId,
+					level: returnValues.level,
+					status: returnValues.status,
+					amountBNB: returnValues.amountBNB,
+					amountMainToken: returnValues.amountMainToken,
+					timestamp: returnValues.timestamp || ev.blockNumber, // 如果没有timestamp字段，使用区块号
+					blockNumber: ev.blockNumber,
+					transactionHash: ev.transactionHash
+				};
+			});
+			// 在数据填充后调用
+			setTimeout(() => {
+				console.log(123);
+
+				showDashboardContent();
+			}, 500);
+
+			// 按时间倒序排列
+			rewards.sort((a, b) => b.timestamp - a.timestamp);
 		}
 	} catch (e) {
-		console.log(e);
-		
-		window.showToast && window.showToast('Failed to load slot history', 'error');
+		console.log('Error loading rewards:', e);
+		window.showToast && window.showToast('Failed to load reward history', 'error');
 	}
 
-	document.getElementById('slotHistoryVip').textContent = `VIP${vipLevel}`;
-	document.getElementById('slotHistoryAmount').textContent = `${window.getVipAmount ? window.getVipAmount(vipLevel) : ''}BNB`;
-	document.getElementById('slotHistoryCycle').textContent = cycle;
-
-	renderSlotHistoryTable(slotHistoryRows);
+	renderRewardList(rewards);
 
 	document.getElementById('backBtn').onclick = function () {
 		window.location.href = 'dashboard.html';
 	};
 });
 
-function renderSlotHistoryTable(rows) {
+function renderRewardList(rewards) {
 	const table = document.getElementById('slotHistoryTable');
 	table.innerHTML = '';
-	if (!rows || rows.length === 0) {
-		table.innerHTML = '<div class="no-partner-data">No slot history found.</div>';
+	if (!rewards || rewards.length === 0) {
+		table.innerHTML = '<div class="no-reward-data">No reward history found.</div>';
 		return;
 	}
-	rows.forEach(row => {
-		const rowDiv = document.createElement('div');
-		rowDiv.className = 'slot-history-row';
-		rowDiv.innerHTML = row.map(slot => {
-			if (slot.type === 'cycle') {
-				return `<div class="slot-history-cycle-col"><div class="slot-history-cycle-icon">&#x21bb;</div><div class="slot-history-cycle-num">${slot.id}</div></div>`;
-			} else {
-				return `<div class="slot-history-slot">${slot.id}</div>`;
-			}
-		}).join('');
-		table.appendChild(rowDiv);
+	rewards.forEach(reward => {
+		const eventType = reward.status === '0' ? t('clear') : t('dividend');
+		const formattedTime = formatTimestamp(reward.timestamp);
+		const formattedBNB = window.web3.utils.fromWei(reward.amountBNB, 'ether');
+		const formattedTaurus = window.web3.utils.fromWei(reward.amountMainToken, 'ether');
+		const bnbStr = Number(formattedBNB).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+		const taurusStr = Number(formattedTaurus).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+		const card = document.createElement('div');
+		card.className = 'reward-card';
+		card.innerHTML = `
+			<div class="reward-card-header flex-between">
+				<span class="reward-card-source">${t('from')}: ID ${reward.toUserId}</span>
+				<span class="reward-card-level">VIP${reward.level}</span>
+			</div>
+			<div class="reward-card-middle flex-between">
+				<span class="reward-card-event ${eventType.toLowerCase()} pulse">${eventType}</span>
+				<span class="reward-card-time">${formattedTime}</span>
+			</div>
+			<div class="reward-card-amounts flex-between">
+				<span class="reward-card-bnb">
+					<img src="assets/images/bnb.png" alt="BNB">
+					${bnbStr} BNB
+				</span>
+				<span class="reward-card-taurus">
+					<img src="assets/images/taurus_logo.png" alt="Taurus">
+					${taurusStr} Taurus
+				</span>
+			</div>
+		`;
+		table.appendChild(card);
 	});
 } 

@@ -5,7 +5,7 @@ html, body {
     min-height: 100vh;
     margin: 0;
     padding: 0;
-    background: #0C0E14 url('../assets/images/background.png') no-repeat center center fixed;
+    background: #0C0E14 url('../assets/images/background.jpg') no-repeat center center fixed;
     background-size: cover;
     color: #FAF6F6;
     overflow-x: hidden;

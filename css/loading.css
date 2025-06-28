@@ -2,9 +2,23 @@
 
 /* Background */
 body {
-    background: url('../assets/images/background.png') no-repeat center center fixed;
+    background: #0C0E14 url('../assets/images/background.jpg') no-repeat center center fixed;
     background-size: cover;
     overflow: hidden;
+}
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(240, 185, 11, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(240, 185, 11, 0.05) 0%, transparent 50%),
+        linear-gradient(135deg, rgba(12, 14, 20, 0.95) 0%, rgba(12, 14, 20, 0.92) 100%);
+    z-index: 0;
+    pointer-events: none;
 }
 
 /* Loading Container */
@@ -184,8 +198,8 @@ body {
     position: relative;
     width: 100%;
     height: 0.5rem;
-    background: rgba(30, 43, 38, 0.8);
-    border-radius: 0.25rem;
+    background: rgba(30,43,38,0.5);
+    border-radius: 0.5rem;
     overflow: hidden;
     margin-bottom: 1rem;
     border: 1px solid rgba(240, 185, 11, 0.3);
@@ -479,4 +493,121 @@ body {
     .decorative-elements {
         display: none;
     }
+}
+
+/* 金色流光环 */
+.loading-glow-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 13.5rem;
+  height: 13.5rem;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #F0B90B 0deg, #F0B90B 60deg, transparent 120deg, transparent 360deg);
+  filter: blur(8px) brightness(1.2);
+  opacity: 0.7;
+  animation: glowRingRotate 2.5s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+@keyframes glowRingRotate {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 粒子环绕 */
+.particle-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 11.5rem;
+  height: 11.5rem;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+}
+.particle {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #F0B90B 60%, #FAF6F6 100%, transparent 100%);
+  box-shadow: 0 0 8px 2px #F0B90B99;
+  opacity: 0.85;
+}
+.p1 { top: 0; left: 50%; transform: translate(-50%, 0); animation: orbit 2.2s linear infinite; }
+.p2 { top: 18%; left: 85%; transform: translate(-50%, -50%); animation: orbit 2.2s linear infinite 0.25s; }
+.p3 { top: 50%; left: 100%; transform: translate(-50%, -50%); animation: orbit 2.2s linear infinite 0.5s; }
+.p4 { top: 82%; left: 85%; transform: translate(-50%, -50%); animation: orbit 2.2s linear infinite 0.75s; }
+.p5 { top: 100%; left: 50%; transform: translate(-50%, -100%); animation: orbit 2.2s linear infinite 1s; }
+.p6 { top: 82%; left: 15%; transform: translate(-50%, -50%); animation: orbit 2.2s linear infinite 1.25s; }
+.p7 { top: 50%; left: 0%; transform: translate(-50%, -50%); animation: orbit 2.2s linear infinite 1.5s; }
+.p8 { top: 18%; left: 15%; transform: translate(-50%, -50%); animation: orbit 2.2s linear infinite 1.75s; }
+@keyframes orbit {
+  0% { filter: brightness(1.2) blur(0px); }
+  50% { filter: brightness(2.2) blur(2px); }
+  100% { filter: brightness(1.2) blur(0px); }
+}
+
+/* 进度条流光 */
+.progress-bar {
+  overflow: hidden;
+}
+.progress-shine {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-position: -100% 0;
+  animation: progressShineMove 2.2s linear infinite;
+  opacity: 0.18;
+  filter: blur(2px);
+}
+@keyframes progressShineMove {
+  0% { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+
+/* 中心多层发光 */
+.center-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+.center-glow.g1 {
+  width: 3.5rem; height: 3.5rem;
+  background: radial-gradient(circle, #F0B90B55 0%, transparent 80%);
+  filter: blur(2px);
+  opacity: 0.7;
+  animation: centerGlowPulse 2.2s infinite alternate;
+}
+.center-glow.g2 {
+  width: 5.5rem; height: 5.5rem;
+  background: radial-gradient(circle, #F0B90B33 0%, transparent 90%);
+  filter: blur(4px);
+  opacity: 0.5;
+  animation: centerGlowPulse 2.2s infinite alternate 0.5s;
+}
+@keyframes centerGlowPulse {
+  0% { opacity: 0.5; }
+  100% { opacity: 0.9; }
+}
+
+/* 进度数字发光跳动 */
+.progress-text {
+  animation: progressTextPulse 1.2s infinite alternate;
+  text-shadow: 0 0 8px #F0B90B, 0 0 2px #FAF6F6;
+}
+@keyframes progressTextPulse {
+  0% { color: #F0B90B; }
+  100% { color: #FAF6F6; }
 }

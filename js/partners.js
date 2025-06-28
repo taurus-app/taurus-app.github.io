@@ -4,12 +4,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (window.getCurrentAddress) {
         address = await window.getCurrentAddress();
     }
+	await initializeWeb3AndContract();
     // 调用auth判断会员状态
     if (window.checkMembershipStatus && address) {
         window.checkMembershipStatus(address, 'partners');
     }
-
-    await initializeWeb3AndContract();
 
     // 链上获取新伙伴数据
     let partnerCount = '--';
@@ -39,11 +38,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             }));
         }
     } catch (err) {
-        window.showToast && window.showToast('Failed to load partners', 'error');
+        window.showToast && window.showToast(t('partners.noData'), 'error');
     }
 
-    document.getElementById('partnerCount').innerHTML = `My Partners: <span style="font-weight: bold;">${partnerCount}</span>`;
+    document.getElementById('partnerCount').innerHTML = `${t('partners.myPartners')}: <span style="font-weight: bold;">${partnerCount}</span>`;
     renderPartnerList(newPartners);
+	// 在数据填充后调用
+	setTimeout(() => {
+		showDashboardContent();
+	}, 500);
 
     document.getElementById('backBtn').onclick = function() {
         window.location.href = 'dashboard.html';
@@ -55,7 +58,7 @@ function renderPartnerList(partners) {
     list.innerHTML = '';
     if (!partners || partners.length === 0) {
         // 无数据展示
-        list.innerHTML = `<div class="no-partner-data">No new partners yet.</div>`;
+        list.innerHTML = `<div class="no-partner-data">${t('partners.noData')}</div>`;
         return;
     }
     partners.forEach(p => {
