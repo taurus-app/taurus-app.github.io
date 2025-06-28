@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 	// 4. 填充数据
 	document.getElementById('userId').textContent = userData.userId;
-	document.getElementById('vipLevel').textContent = 'VIP' + userData.vipLevel;
+	document.getElementById('vipLevel').textContent = 'T' + userData.vipLevel;
 	document.getElementById('inviterId').textContent = t('dashboard.invitedBy') + ' ' + userData.inviterId;
 	document.getElementById('partnerCount').innerHTML = `${t('partners.myPartners')}: <span style="font-weight: bold;">${userData.partnerCount}</span>`;
 	document.getElementById('inviteLink').textContent = userData.inviteLink;
@@ -67,14 +67,14 @@ document.addEventListener('DOMContentLoaded', async function () {
 	}, 500);
 	document.querySelectorAll('.slot-view-btn').forEach(function (btn, idx) {
 		btn.onclick = function () {
-			// 获取当前slot的VIP等级
+			// 获取当前slot的T等级
 			const slotLevel = slots[idx].level;
 			window.location.href = `slot-history.html?vip=${slotLevel}`;
 		};
 	});
 });
 
-// 查询用户所有VIP等级的插槽奖励
+// 查询用户所有T等级的插槽奖励
 async function getUserSlots(userId, vipLevel) {
 	if (!window.taurusContract || !userId || !vipLevel) return [];
 	const slots = [];
@@ -154,7 +154,7 @@ function renderSlots(slots) {
 		slotDiv.className = 'slot-group' + (isLocked ? ' card-disabled' : '');
 		slotDiv.innerHTML = `
             <div class="slot-header">
-                <span class="slot-level">VIP${level}</span>
+                <span class="slot-level">T${level}</span>
                 <span class="slot-amount">${window.getVipAmount ? window.getVipAmount(level) : ''}BNB</span>
                 <span class="slot-header-right">${rightContent}</span>
             </div>

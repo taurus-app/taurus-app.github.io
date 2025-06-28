@@ -67,7 +67,7 @@ function renderPartnerList(partners) {
         card.innerHTML = `
             <div class="partner-card-header">
                 <span class="partner-card-id">ID: <span style="color:#F0B90B">${p.id}</span></span>
-                <span class="partner-card-vip">VIP${p.vip}</span>
+                <span class="partner-card-vip">T${p.vip}</span>
             </div>
             <div class="partner-card-address">${formatAddress(p.address)}</div>
         `;

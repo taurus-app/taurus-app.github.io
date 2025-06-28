@@ -123,7 +123,7 @@ function renderRewardList(rewards) {
 		card.innerHTML = `
 			<div class="reward-card-header flex-between">
 				<span class="reward-card-source">${t('from')}: ID ${reward.toUserId}</span>
-				<span class="reward-card-level">VIP${reward.level}</span>
+				<span class="reward-card-level">T${reward.level}</span>
 			</div>
 			<div class="reward-card-middle flex-between">
 				<span class="reward-card-event ${eventType.toLowerCase()} pulse">${eventType}</span>

@@ -1,4 +1,4 @@
-// VIP等级与升级所需BNB数量映射
+// T等级与升级所需BNB数量映射
 const vipLevelAmountMap = {
     1: 0.001,
     2: 0.002,
@@ -12,7 +12,7 @@ const vipLevelAmountMap = {
 };
 
 /**
- * 通过VIP等级获取所需BNB数量
+ * 通过T等级获取所需BNB数量
  * @param {number} vipLevel
  * @returns {number} BNB数量
  */
