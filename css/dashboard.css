@@ -603,13 +603,13 @@ body::before {
 .slot-dot.direct {
     background: linear-gradient(135deg, #F0B90B 0%, #FAF6F6 100%);
     border-color: #BE9102;
-    box-shadow: 0 0 6px 1px rgba(240,185,11,0.18), 0 0 0.5rem #0C0E14 inset;
+    box-shadow: 0 0 6px 1px #F0B90B, 0 0 0.5rem #0C0E14 inset;
 }
 
 .slot-dot.indirect {
     background: linear-gradient(135deg, #1EDB8B 0%, #145C32 100%);
     border-color: #F0B90B;
-    box-shadow: 0 0 6px 1px rgba(30,219,139,0.18), 0 0 0.5rem #0C0E14 inset;
+    box-shadow: 0 0 6px 1px rgba(30,219,139,1), 0 0 0.5rem #0C0E14 inset;
 }
 
 .slot-dot.empty {
@@ -678,7 +678,7 @@ body::before {
 }
 
 .legend-dot.direct {
-    background: linear-gradient(135deg, #F0B90B 0%, #FAF6F6 100%);
+    background: linear-gradient(135deg, #F0B90B 100%, #FAF6F6 100%);
     border-color: #BE9102;
     box-shadow: 0 0 6px 1px rgba(240,185,11,0.18), 0 0 0.5rem #0C0E14 inset;
 }
