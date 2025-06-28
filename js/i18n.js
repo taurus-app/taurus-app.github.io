@@ -65,7 +65,7 @@ window.I18N_DICT = {
 		'register.inviteId': '邀请人ID',
 		'register.connectWallet': '连接钱包',
 		'register.register': '注册',
-		'register.copySuccess': '邀请链接已复制！',
+		'register.copySuccess': '已复制',
 		'register.copyFailed': '复制失败',
 		'slotHistory.title': '插槽历史',
 		'slotHistory.recentRewards': '最近奖励',
