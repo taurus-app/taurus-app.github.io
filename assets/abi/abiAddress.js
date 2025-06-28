@@ -1,7 +1,7 @@
 // Contract addresses configuration
 // todo change contract address
 const CONTRACT_ADDRESSES = {
-    TAURUS: '0x5F89F8AD74DBfB9bf35284e17AFe45eeb30c4c8e'
+    TAURUS: '0x5BE1115E443D961aa668Da028345FeFDe9Aa96B8'
 };
 
 // Export for use in other files

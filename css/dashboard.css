@@ -448,6 +448,7 @@ body::before {
     flex: 1;
     word-break: break-all;
     font-weight: 500;
+	user-select: text;
 }
 
 .copy-btn {
@@ -575,10 +576,10 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 700;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-    color: #FAF6F6;
+    color: #1E2B26;
     border: 2px solid rgba(240, 185, 11, 0.3);
     box-shadow: 
         0 0.3rem 0.8rem rgba(240, 185, 11, 0.2),
@@ -606,36 +607,21 @@ body::before {
 }
 
 .slot-dot.direct {
-    background: linear-gradient(135deg, #F0B90B 0%, #BE9102 100%);
-    color: #0C0E14;
-    border-color: #F0B90B;
-    box-shadow: 
-        0 0.5rem 1.2rem rgba(240, 185, 11, 0.4),
-        inset 0 0.1rem 0.2rem rgba(255, 255, 255, 0.3);
-    animation: directPulse 2s ease-in-out infinite;
-}
-
-@keyframes directPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    background: linear-gradient(135deg, #F0B90B 0%, #FAF6F6 100%);
+    border-color: #BE9102;
+    box-shadow: 0 0 6px 1px rgba(240,185,11,0.18), 0 0 0.5rem #0C0E14 inset;
 }
 
 .slot-dot.indirect {
-    background: linear-gradient(135deg, #BE9102 0%, #8B6914 100%);
-    color: #0C0E14;
-    border-color: #BE9102;
-    box-shadow: 
-        0 0.4rem 1rem rgba(190, 145, 2, 0.3),
-        inset 0 0.1rem 0.2rem rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, #1EDB8B 0%, #145C32 100%);
+    border-color: #F0B90B;
+    box-shadow: 0 0 6px 1px rgba(30,219,139,0.18), 0 0 0.5rem #0C0E14 inset;
 }
 
 .slot-dot.empty {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-    color: rgba(250, 246, 246, 0.5);
-    border-color: rgba(240, 185, 11, 0.1);
-    box-shadow: 
-        0 0.2rem 0.5rem rgba(240, 185, 11, 0.1),
-        inset 0 0.1rem 0.2rem rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, #5EC6FF 0%, #A6D8FF 100%);
+    border-color: #F0B90B;
+    box-shadow: 0 0 6px 1px rgba(94,198,255,0.13), 0 0 0.5rem #0C0E14 inset;
 }
 
 .slot-divider {
@@ -698,18 +684,21 @@ body::before {
 }
 
 .legend-dot.direct {
-    background: linear-gradient(135deg, #F0B90B 0%, #BE9102 100%);
-    border-color: #F0B90B;
+    background: linear-gradient(135deg, #F0B90B 0%, #FAF6F6 100%);
+    border-color: #BE9102;
+    box-shadow: 0 0 6px 1px rgba(240,185,11,0.18), 0 0 0.5rem #0C0E14 inset;
 }
 
 .legend-dot.indirect {
-    background: linear-gradient(135deg, #BE9102 0%, #8B6914 100%);
-    border-color: #BE9102;
+    background: linear-gradient(135deg, #1EDB8B 0%, #145C32 100%);
+    border-color: #F0B90B;
+    box-shadow: 0 0 6px 1px rgba(30,219,139,0.18), 0 0 0.5rem #0C0E14 inset;
 }
 
 .legend-dot.empty {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-    border-color: rgba(240, 185, 11, 0.2);
+    background: linear-gradient(135deg, #5EC6FF 0%, #A6D8FF 100%);
+    border-color: #F0B90B;
+    box-shadow: 0 0 6px 1px rgba(94,198,255,0.13), 0 0 0.5rem #0C0E14 inset;
 }
 
 /* Slot View Button */
@@ -797,7 +786,7 @@ body::before {
     .slot-dot {
         width: 2.8rem;
         height: 2.8rem;
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
     
     .legend-dot {

@@ -74,6 +74,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 	});
 });
 
+// 判断point direct/indirect及真实id
+function parsePoint(point) {
+	const val = BigInt(point);
+	const billion = 1000000000n;
+	if (val >= billion) {
+		return { type: 'direct', id: (val - billion).toString() };
+	} else {
+		return { type: 'indirect', id: val.toString() };
+	}
+}
+
 // 查询用户所有T等级的插槽奖励
 async function getUserSlots(userId, vipLevel) {
 	if (!window.taurusContract || !userId || !vipLevel) return [];
@@ -84,11 +95,14 @@ async function getUserSlots(userId, vipLevel) {
 				const slotData = await window.taurusContract.methods.getUserSlot(userId, level).call();
 				// 过滤掉值为0的数据
 				const slotArr = [];
+				console.log(slotData);
 				if (slotData.point1 && slotData.point1 !== '0' && slotData.point1 !== 0) {
-					slotArr.push({ type: 'direct', id: slotData.point1 });
+					const p1 = parsePoint(slotData.point1);
+					slotArr.push({ type: p1.type, id: p1.id });
 				}
 				if (slotData.point2 && slotData.point2 !== '0' && slotData.point2 !== 0) {
-					slotArr.push({ type: 'indirect', id: slotData.point2 });
+					const p2 = parsePoint(slotData.point2);
+					slotArr.push({ type: p2.type, id: p2.id });
 				}
 				// 保证有3个插槽，空位补empty
 				while (slotArr.length < 3) {
@@ -159,12 +173,12 @@ function renderSlots(slots) {
                 <span class="slot-header-right">${rightContent}</span>
             </div>
             <div class="slot-circles">
-                ${slot.slots.map((s, idx) => {
+                ${slot.slots.map((s) => {
 			let dotClass = 'slot-dot';
 			if (isLocked) dotClass += ' disabled';
 			else if (s.type === 'empty') dotClass += ' empty';
-			else if (idx === 2) dotClass += ' indirect';
-			else dotClass += ' direct';
+			else if (s.type === 'indirect') dotClass += ' indirect';
+			else if (s.type === 'direct') dotClass += ' direct';
 			return `<span class="${dotClass}">${s.id ? s.id : ''}</span>`;
 		}).join('')}
             </div>
