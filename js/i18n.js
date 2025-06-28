@@ -44,7 +44,7 @@ window.I18N_DICT = {
 		'noBonusTip': 'No bonus generated',
 		'walletAddress': 'Wallet Address',
 		'tips': 'Tips',
-		'registerPayTip': 'Register and pay 0.1 BNB to upgrade to V1 member',
+		'registerPayTip': 'Register and pay 0.1 BNB to upgrade to T1 member',
 		'availableBalance': 'Available balance'
 	},
 	zh: {
@@ -90,7 +90,7 @@ window.I18N_DICT = {
 		'noBonusTip': '未产生分红',
 		'walletAddress': '钱包地址',
 		'tips': '提示',
-		'registerPayTip': '注册并支付0.1 BNB升级为V1会员',
+		'registerPayTip': '注册并支付0.1 BNB升级为T1会员',
 		'availableBalance': '可用余额'
 	},
 	ko: {
@@ -136,7 +136,7 @@ window.I18N_DICT = {
 		'noBonusTip': '보너스 없음',
 		'walletAddress': '지갑 주소',
 		'tips': '팁',
-		'registerPayTip': '회원가입 및 0.1 BNB 결제로 V1 멤버로 업그레이드',
+		'registerPayTip': '회원가입 및 0.1 BNB 결제로 T1 멤버로 업그레이드',
 		'availableBalance': '사용 가능 잔액'
 	},
 	zh_tw: {
@@ -182,7 +182,7 @@ window.I18N_DICT = {
 		'noBonusTip': '未產生分紅',
 		'walletAddress': '錢包地址',
 		'tips': '提示',
-		'registerPayTip': '註冊並支付0.1 BNB升級為V1會員',
+		'registerPayTip': '註冊並支付0.1 BNB升級為T1會員',
 		'availableBalance': '可用餘額'
 	}
 };
