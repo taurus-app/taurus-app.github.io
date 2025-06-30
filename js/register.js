@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 	// 注册所需BNB（可后续支持合约读取）
 	// todo change register bnb
-	const REGISTER_BNB = 0.001;
+	const REGISTER_BNB = 0.1;
 
 	// 检查URL参数，自动填充邀请人ID
 	const urlParams = new URLSearchParams(window.location.search);
