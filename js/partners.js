@@ -15,10 +15,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     let newPartners = [];
     try {
         if (window.taurusContract && address) {
+            console.log('开始获取合作伙伴数据，当前地址:', address);
+
             const info = await window.taurusContract.methods.getFullUser(address).call();
             partnerCount = info.invitedCount || 0;
-            // invitedUsers: address[3]
-            const partnerAddresses = (info.invitedUsers || []).filter(addr => addr && addr !== '0x0000000000000000000000000000000000000000');
+
+            // 通过事件日志获取邀请的用户
+            const partnerAddresses = await getPartnersByEvent(address);
+            
+            console.log('获取到的合作伙伴数量:', partnerCount);
             // 并发获取详细信息
             newPartners = await Promise.all(partnerAddresses.map(async (addr) => {
                 try {
@@ -52,6 +57,49 @@ document.addEventListener('DOMContentLoaded', async function() {
         window.location.href = 'dashboard.html';
     };
 });
+
+// 通过事件日志获取合作伙伴地址
+async function getPartnersByEvent(inviterAddress) {
+    try {
+        console.log('getPartnersByEvent', inviterAddress);
+        // 加载合约ABI
+        const response = await fetch('assets/abi/tauruabi.json');
+        const taurusABI = await response.json();
+
+        const web3 = new Web3("https://rpc.ankr.com/bsc/2bd6c0010236463db32d50c26a7a5efb5cbcfcc799d5d7ea4b380a4d258d8e1a");
+        const taurusContract = new web3.eth.Contract(
+            taurusABI,
+            window.CONTRACT_ADDRESSES.TAURUS
+        );
+        // 获取当前区块号
+        const currentBlock = await web3.eth.getBlockNumber();
+        const fromBlock = Math.max(0, currentBlock - 100000);
+        
+        console.log('查询区块范围:', { fromBlock, toBlock: 'latest', currentBlock });
+        
+        // 查询Registered事件，筛选inviter为当前地址
+        const events = await taurusContract.getPastEvents('Registered', {
+            filter: { inviter: inviterAddress },
+            fromBlock: fromBlock,
+            toBlock: 'latest'
+        });
+        
+        console.log('查询到的事件总数:', events.length,inviterAddress);
+        console.log('事件详情:', events);
+        
+        // 提取user地址并去重
+        const addresses = events.map(event => event.returnValues.user);
+        const uniqueAddresses = [...new Set(addresses)];
+        
+        console.log('提取的地址:', addresses);
+        console.log('去重后的地址:', uniqueAddresses);
+        
+        return uniqueAddresses;
+    } catch (error) {
+        console.error('Error fetching partners by event:', error);
+        return [];
+    }
+}
 
 function renderPartnerList(partners) {
     const list = document.getElementById('partnerList');
