@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 			userData.vipLevel = parseInt(info.currentLevel) || 0;
 			userData.inviterId = info.inviterId || '--';
 			userData.partnerCount = info.invitedCount || '--';
-			userData.inviteLink = `https://taurus-app.github.io/register?invite=${userData.userId}`;
+			userData.inviteLink = `https://taurus-app.net//register?invite=${userData.userId}`;
 			userData.isBlocked = info.isBlocked === true || info.isBlocked === 'true'; // 兼容字符串
 			userData.slots = await getUserSlots(userData.userId, userData.vipLevel);
 		}
