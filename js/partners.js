@@ -73,7 +73,7 @@ async function getPartnersByEvent(inviterAddress) {
         );
         // 获取当前区块号
         const currentBlock = await web3.eth.getBlockNumber();
-        const fromBlock = Math.max(0, currentBlock - 300000);
+        const fromBlock = Math.max(0, currentBlock - 400000);
         
         console.log('查询区块范围:', { fromBlock, toBlock: 'latest', currentBlock });
         
