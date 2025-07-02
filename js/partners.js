@@ -41,34 +41,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                     };
                 }
             }));
-
-	// 如果 newPartners 为空，使用已获取的 info.invitedUsers 数据
-        if (newPartners.length === 0 && info.invitedUsers) {
-            console.log('从事件获取的合作伙伴为空，使用 invitedUsers 数据');
-            
-            // 过滤掉零地址
-            const validInvitedUsers = info.invitedUsers.filter(addr => 
-                addr && addr !== '0x0000000000000000000000000000000000000000'
-            );
-            
-            // 对每个邀请的用户地址获取详细信息
-            newPartners = await Promise.all(validInvitedUsers.map(async (addr) => {
-                try {
-                    const pInfo = await window.taurusContract.methods.getFullUser(addr).call();
-                    return {
-                        id: pInfo.id || '--',
-                        vip: pInfo.currentLevel || '--',
-                        address: addr
-                    };
-                } catch (e) {
-                    return {
-                        id: '--',
-                        vip: '--',
-                        address: addr
-                    };
-                }
-            }));
-
         }
     } catch (err) {
         window.showToast && window.showToast(t('partners.noData'), 'error');
