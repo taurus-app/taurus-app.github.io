@@ -3,7 +3,6 @@
 document.addEventListener('DOMContentLoaded', async function () {
 	await initializeWeb3AndContract();
 	
-	// 兼容新版MetaMask，确保window.web3被正确初始化
 	if (window.ethereum && typeof window.Web3 !== 'undefined') {
 		window.web3 = new Web3(window.ethereum);
 	}
@@ -14,28 +13,21 @@ document.addEventListener('DOMContentLoaded', async function () {
 	const registerForm = document.querySelector('.register-form');
 	const registerBtn = document.getElementById('registerBtn');
 
-	// 注册所需BNB（可后续支持合约读取）
-	// todo change register bnb
 	const REGISTER_BNB = 0.1;
 
-	// 检查URL参数，自动填充邀请人ID
 	const urlParams = new URLSearchParams(window.location.search);
 	const inviteValue = urlParams.get('invite');
 	if (inviteValue) {
 		inviterInput.value = inviteValue;
 	}
 
-	/**
-	 * 格式化钱包地址，保留前6位和后4位，中间用...代替
-	 * @param {string} address 钱包地址
-	 * @returns {string} 格式化后的地址
-	 */
+
 	function formatAddress(address) {
 		if (!address || address.length <= 10) return address;
 		return address.slice(0, 28) + '...' + address.slice(-4);
 	}
 
-	// 统一通过auth.js的getCurrentAddress获取钱包地址
+
 	async function updateWalletAddress() {
 		if (window.getCurrentAddress) {
 			const addr = await window.getCurrentAddress();
@@ -52,12 +44,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 	}
 	await updateWalletAddress();
 
-	// 监听钱包切换
+
 	if (window.ethereum) {
 		window.ethereum.on('accountsChanged', updateWalletAddress);
 	}
 
-	// 注册按钮事件
+
 	let isSubmitting = false;
 	registerForm.addEventListener('submit', async function (e) {
 		e.preventDefault();
@@ -94,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 		}
 
 		try {
-			// 检查BNB余额
+	
 			const web3 = window.web3;
 			const balanceWei = await web3.eth.getBalance(address);
 			const balance = parseFloat(web3.utils.fromWei(balanceWei, 'ether'));
@@ -106,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 				return;
 			}
 
-			// 发起合约注册交易
+
 			showToast('Waiting for wallet signature...', 'info');
 			window.taurusContract.methods.register(inviterId).send({
 				from: address,
@@ -147,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	});
 });
 
-// 获取BNB余额
+
 function getBNBBalance(address, balanceSpan) {
 	if (window.ethereum && typeof window.Web3 !== 'undefined') {
 		window.web3 = new Web3(window.ethereum);
