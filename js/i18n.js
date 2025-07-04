@@ -1,4 +1,4 @@
-// i18n.js - 国际化支持
+// i18n.js 
 
 window.I18N_DICT = {
 	en: {
@@ -202,11 +202,11 @@ function applyI18n(lang) {
 	localStorage.setItem('lang', lang);
 }
 
-// 页面加载时自动应用
+
 window.addEventListener('DOMContentLoaded', function() {
 	const userLang = localStorage.getItem('lang') || 'en';
 	applyI18n(userLang);
-	// 设置按钮高亮
+
 	document.querySelectorAll('.lang-btn').forEach(btn => {
 		btn.classList.toggle('active', btn.dataset.lang === userLang);
 		btn.onclick = function() {
@@ -220,7 +220,7 @@ window.addEventListener('DOMContentLoaded', function() {
 		};
 	});
 
-	// 地球按钮下拉菜单事件
+
 	const langDropdownBtn = document.getElementById('langDropdownBtn');
 	const langDropdown = langDropdownBtn ? langDropdownBtn.closest('.lang-dropdown') : null;
 	if(langDropdownBtn && langDropdown) {
@@ -236,5 +236,5 @@ window.addEventListener('DOMContentLoaded', function() {
 	}
 });
 
-// 导出t函数
+
 window.t = t; 
