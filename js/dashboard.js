@@ -4,24 +4,24 @@ let userData = {
 	inviterId: '--',
 	partnerCount: '--',
 	inviteLink: '',
-	slots: [], // 这里后续可链上获取
+	slots: [], 
 	isBlocked: false
 };
 
 document.addEventListener('DOMContentLoaded', async function () {
-	// 1. 获取钱包地址
+	
 	let address = '';
 	if (window.getCurrentAddress) {
 		address = await window.getCurrentAddress();
 		document.getElementById('walletAddress').value = formatAddress(address);
 	}
 
-	// 2. 调用auth判断会员状态
+	
 	if (window.checkMembershipStatus && address) {
 		window.checkMembershipStatus(address, 'dashboard');
 	}
 
-	// 3. 链上获取用户数据
+	
 	await initializeWeb3AndContract();
 	try {
 		if (window.taurusContract && address) {
@@ -31,50 +31,50 @@ document.addEventListener('DOMContentLoaded', async function () {
 			userData.inviterId = info.inviterId || '--';
 			userData.partnerCount = info.invitedCount || '--';
 			userData.inviteLink = `https://taurus-app.net/register?invite=${userData.userId}`;
-			userData.isBlocked = info.isBlocked === true || info.isBlocked === 'true'; // 兼容字符串
+			userData.isBlocked = info.isBlocked === true || info.isBlocked === 'true'; 
 			userData.slots = await getUserSlots(userData.userId, userData.vipLevel);
 		}
 	} catch (err) {
 		window.showToast && window.showToast('Failed to load user info', 'error');
 	}
 
-	// 4. 填充数据
+
 	document.getElementById('userId').textContent = userData.userId;
 	document.getElementById('vipLevel').textContent = 'T' + userData.vipLevel;
 	document.getElementById('inviterId').textContent = t('dashboard.invitedBy') + ' ' + userData.inviterId;
 	document.getElementById('partnerCount').innerHTML = `${t('partners.myPartners')}: <span style="font-weight: bold;">${userData.partnerCount}</span>`;
 	document.getElementById('inviteLink').textContent = userData.inviteLink;
 
-	// 5. 渲染插槽
+	
 	renderSlots(userData.slots);
 
-	// 6. 复制邀请链接
+	
 	document.getElementById('copyInviteBtn').onclick = function () {
 		navigator.clipboard.writeText(userData.inviteLink);
 		if (window.showToast) window.showToast(t('register.copySuccess'), 'success');
 	};
 
-	// 7. Details按钮跳转到我的伙伴页面
+
 	document.getElementById('detailsBtn').onclick = function () {
 		window.location.href = 'partners.html';
 	};
 
-	// 8. Slot View按钮跳转到slot-history.html
+	
 	const slots = userData.slots;
-	// 在数据填充后调用
+	
 	setTimeout(() => {
 		showDashboardContent();
 	}, 500);
 	document.querySelectorAll('.slot-view-btn').forEach(function (btn, idx) {
 		btn.onclick = function () {
-			// 获取当前slot的T等级
+			
 			const slotLevel = slots[idx].level;
 			window.location.href = `slot-history.html?vip=${slotLevel}`;
 		};
 	});
 });
 
-// 判断point direct/indirect及真实id
+
 function parsePoint(point) {
 	const val = BigInt(point);
 	const billion = 1000000000n;
@@ -85,7 +85,7 @@ function parsePoint(point) {
 	}
 }
 
-// 查询用户所有T等级的插槽奖励
+
 async function getUserSlots(userId, vipLevel) {
 	if (!window.taurusContract || !userId || !vipLevel) return [];
 	const slots = [];
@@ -93,7 +93,7 @@ async function getUserSlots(userId, vipLevel) {
 		for (let level = 1; level <= vipLevel; level++) {
 			try {
 				const slotData = await window.taurusContract.methods.getUserSlot(userId, level).call();
-				// 过滤掉值为0的数据
+				
 				const slotArr = [];
 				console.log(slotData);
 				if (slotData.point1 && slotData.point1 !== '0' && slotData.point1 !== 0) {
@@ -104,7 +104,7 @@ async function getUserSlots(userId, vipLevel) {
 					const p2 = parsePoint(slotData.point2);
 					slotArr.push({ type: p2.type, id: p2.id });
 				}
-				// 保证有3个插槽，空位补empty
+				
 				while (slotArr.length < 3) {
 					slotArr.push({ type: 'empty' });
 				}
@@ -115,7 +115,7 @@ async function getUserSlots(userId, vipLevel) {
 					slots: slotArr
 				});
 			} catch (e) {
-				// 某一级异常，跳过
+				
 				slots.push({
 					level,
 					amount: window.getVipAmount ? window.getVipAmount(level) : '',
@@ -125,7 +125,7 @@ async function getUserSlots(userId, vipLevel) {
 			}
 		}
 	} catch (err) {
-		// 全局异常
+		
 		window.showToast && window.showToast(t('dashboard.failed'), 'error');
 	}
 	return slots;
@@ -148,7 +148,7 @@ function renderSlots(slots) {
 		let rightContent = '';
 		if (!isLocked) {
 			if (level === currentVip && userData.isBlocked) {
-				// 有View按钮
+				
 				if (showView) {
 					rightContent = `<span class="vip-locked" title="Blocked"><span class="vip-lock-icon">🔐</span></span><button class="slot-view-btn" data-level="${level}">${t('dashboard.view')}</button>`;
 				} else {
@@ -222,7 +222,7 @@ function renderSlots(slots) {
 						btn.textContent = t('upgrade');
 						return;
 					}
-					// 检查BNB余额
+					
 					let balance = 0;
 					try {
 						if (window.Web3) {
@@ -244,7 +244,7 @@ function renderSlots(slots) {
 						btn.textContent = t('upgrade');
 						return;
 					}
-					// 发起合约升级交易
+					
 					try {
 						window.showToast && window.showToast('Waiting for wallet signature...', 'info');
 						btn.textContent = 'Upgrading...';
