@@ -1,4 +1,4 @@
-// 时间格式化函数
+
 function formatTimestamp(timestamp) {
 	const date = new Date(timestamp * 1000); // 转换为毫秒
 	const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -8,7 +8,7 @@ function formatTimestamp(timestamp) {
 	return `${month}-${day} ${hours}:${minutes}`;
 }
 
-// 格式化数字显示
+
 function formatNumber(num) {
 	if (!num || num === '0') return '0';
 	const n = parseFloat(num);
@@ -16,13 +16,13 @@ function formatNumber(num) {
 	return n.toFixed(6).replace(/\.?0+$/, '');
 }
 
-// 截断小数，不四舍五入
+
 function truncate(num, decimals) {
 	const factor = Math.pow(10, decimals);
 	return Math.floor(Number(num) * factor) / factor;
 }
 
-// 格式化为千分位字符串，保留指定位数小数
+
 function formatTruncate(num, decimals) {
 	return truncate(num, decimals).toLocaleString(undefined, {
 		minimumFractionDigits: decimals,
@@ -31,7 +31,7 @@ function formatTruncate(num, decimals) {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-	// 获取钱包地址
+
 	let address = '';
 	if (window.getCurrentAddress) {
 		address = await window.getCurrentAddress();
@@ -39,12 +39,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 	await initializeWeb3AndContract();
 
-	// 调用auth判断会员状态
 	if (window.checkMembershipStatus && address) {
 		window.checkMembershipStatus(address, 'slot-history');
 	}
 
-	// 获取用户ID
+
 	let userId = null;
 	try {
 		if (window.taurusContract && address) {
@@ -53,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 		}
 	} catch (e) { }
 
-	// 查询历史奖励事件
+
 	let rewards = [];
 	// Load contract ABI
 	const response = await fetch('assets/abi/tauruabi.json');
@@ -72,7 +71,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 			const latestBlock = await web3.eth.getBlockNumber();
 			const fromBlock = Math.max(0, latestBlock - safeBlockNumber);
 
-			// 查询Notify事件
 			const events = await taurusContract.getPastEvents('Notify', {
 				filter: {
 					fromUserId: userId
@@ -81,7 +79,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 				toBlock: latestBlock
 			});
 
-			// 解析事件数据
 			rewards = events.map(ev => {
 				const returnValues = ev.returnValues;
 				return {
@@ -96,14 +93,14 @@ document.addEventListener('DOMContentLoaded', async function () {
 					transactionHash: ev.transactionHash
 				};
 			});
-			// 在数据填充后调用
+
 			setTimeout(() => {
 				console.log(123);
 
 				showDashboardContent();
 			}, 500);
 
-			// 按时间倒序排列
+
 			rewards.sort((a, b) => b.timestamp - a.timestamp);
 		}
 	} catch (e) {
