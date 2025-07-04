@@ -1,30 +1,29 @@
 document.addEventListener('DOMContentLoaded', async function() {
-    // 获取钱包地址
     let address = '';
     if (window.getCurrentAddress) {
         address = await window.getCurrentAddress();
     }
 	await initializeWeb3AndContract();
-    // 调用auth判断会员状态
+
     if (window.checkMembershipStatus && address) {
         window.checkMembershipStatus(address, 'partners');
     }
 
-    // 链上获取新伙伴数据
+
     let partnerCount = '--';
     let newPartners = [];
     try {
         if (window.taurusContract && address) {
-            console.log('开始获取合作伙伴数据，当前地址:', address);
+            console.log('now address:', address);
 
             const info = await window.taurusContract.methods.getFullUser(address).call();
             partnerCount = info.invitedCount || 0;
 
-            // 通过事件日志获取邀请的用户
+
             const partnerAddresses = await getPartnersByEvent(address);
             
-            console.log('获取到的合作伙伴数量:', partnerCount);
-            // 并发获取详细信息
+            console.log('partnerCount:', partnerCount);
+  
             newPartners = await Promise.all(partnerAddresses.map(async (addr) => {
                 try {
                     const pInfo = await window.taurusContract.methods.getFullUser(addr).call();
@@ -41,16 +40,14 @@ document.addEventListener('DOMContentLoaded', async function() {
                     };
                 }
             }));
-	// 如果 newPartners 为空，使用已获取的 info.invitedUsers 数据
+
 	if (newPartners.length === 0 && info.invitedUsers) {
-	    console.log('从事件获取的合作伙伴为空，使用 invitedUsers 数据');
+	    console.log('invitedUsers from events');
 	    
-	    // 过滤掉零地址
 	    const validInvitedUsers = info.invitedUsers.filter(addr => 
 		addr && addr !== '0x0000000000000000000000000000000000000000'
 	    );
 	    
-	    // 对每个邀请的用户地址获取详细信息
 	    newPartners = await Promise.all(validInvitedUsers.map(async (addr) => {
 		try {
 		    const pInfo = await window.taurusContract.methods.getFullUser(addr).call();
@@ -74,7 +71,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     document.getElementById('partnerCount').innerHTML = `${t('partners.myPartners')}: <span style="font-weight: bold;">${partnerCount}</span>`;
     renderPartnerList(newPartners);
-	// 在数据填充后调用
 	setTimeout(() => {
 		showDashboardContent();
 	}, 500);
@@ -84,11 +80,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 });
 
-// 通过事件日志获取合作伙伴地址
 async function getPartnersByEvent(inviterAddress) {
     try {
         console.log('getPartnersByEvent', inviterAddress);
-        // 加载合约ABI
         const response = await fetch('assets/abi/tauruabi.json');
         const taurusABI = await response.json();
 
@@ -97,28 +91,28 @@ async function getPartnersByEvent(inviterAddress) {
             taurusABI,
             window.CONTRACT_ADDRESSES.TAURUS
         );
-        // 获取当前区块号
+
         const currentBlock = await web3.eth.getBlockNumber();
         const fromBlock = Math.max(0, currentBlock - 400000);
         
-        console.log('查询区块范围:', { fromBlock, toBlock: 'latest', currentBlock });
+        console.log('block region:', { fromBlock, toBlock: 'latest', currentBlock });
         
-        // 查询Registered事件，筛选inviter为当前地址
+
         const events = await taurusContract.getPastEvents('Registered', {
             filter: { inviter: inviterAddress },
             fromBlock: fromBlock,
             toBlock: 'latest'
         });
         
-        console.log('查询到的事件总数:', events.length,inviterAddress);
-        console.log('事件详情:', events);
+        console.log('events.length:', events.length,inviterAddress);
+        console.log('details:', events);
         
-        // 提取user地址并去重
+
         const addresses = events.map(event => event.returnValues.user);
         const uniqueAddresses = [...new Set(addresses)];
         
-        console.log('提取的地址:', addresses);
-        console.log('去重后的地址:', uniqueAddresses);
+        console.log('address:', addresses);
+        console.log('uniqueAddresses:', uniqueAddresses);
         
         return uniqueAddresses;
     } catch (error) {
@@ -131,7 +125,6 @@ function renderPartnerList(partners) {
     const list = document.getElementById('partnerList');
     list.innerHTML = '';
     if (!partners || partners.length === 0) {
-        // 无数据展示
         list.innerHTML = `<div class="no-partner-data">${t('partners.noData')}</div>`;
         return;
     }
