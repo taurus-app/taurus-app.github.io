@@ -54,7 +54,6 @@ function getTaurusContract() {
 	return taurusContract;
 }
 
-// 切换到BSC主网
 async function switchToBSC() {
 	if (!window.ethereum) return false;
 
@@ -70,7 +69,6 @@ async function switchToBSC() {
 	}
 }
 
-// 获取当前钱包地址
 async function getCurrentAddress() {
 	if (!window.ethereum) return '';
 	try {
@@ -81,7 +79,6 @@ async function getCurrentAddress() {
 	}
 }
 
-// 页面加载时自动检测BSC链
 async function ensureBSCNetwork() {
 	if (!window.ethereum) return;
 	const chainId = await window.ethereum.request({ method: 'eth_chainId' });
@@ -90,7 +87,7 @@ async function ensureBSCNetwork() {
 	}
 }
 
-// 监听链切换和账户切换事件，切换后reload，确保web3连接新链和新账户
+
 if (window.ethereum) {
 	window.ethereum.on('chainChanged', function (chainId) {
 		window.location.reload();
@@ -100,7 +97,7 @@ if (window.ethereum) {
 	});
 }
 
-// 简单Toast
+
 function showToast(msg, type = 'info') {
 	const toast = document.createElement('div');
 	toast.className = `toast toast-${type}`;
@@ -126,13 +123,13 @@ function showToast(msg, type = 'info') {
 	}, 2200);
 }
 
-// 页面加载时自动检测BSC
+
 window.addEventListener('DOMContentLoaded', async () => {
 	await ensureBSCNetwork();
 	await initializeWeb3AndContract();
 });
 
-// 导出方法供其他文件使用
+
 window.getCurrentAddress = getCurrentAddress;
 window.ensureBSCNetwork = ensureBSCNetwork;
 window.switchToBSC = switchToBSC;
@@ -141,11 +138,7 @@ window.getWeb3 = getWeb3;
 window.getTaurusContract = getTaurusContract;
 window.initializeWeb3AndContract = initializeWeb3AndContract;
 
-/**
- * 检查用户是否已注册为会员，并根据页面做跳转
- * @param {string} address 钱包地址
- * @param {string} currentPage 当前页面名（如 'register' 或 'dashboard'）
- */
+
 async function checkMembershipStatus(address, currentPage) {
 	try {
 		if (!taurusContract || !address) {
@@ -172,18 +165,18 @@ async function checkMembershipStatus(address, currentPage) {
 
 		if (!isRegistered) {
 			if (currentPage === 'register') {
-				// 注册页未注册，什么都不做
+				
 				return;
 			} else{
-				// 仪表盘页或首页未注册，跳转到注册页
+				
 				window.location.href = 'register.html';
 			}
 		} else {
 			if (currentPage === 'register' || currentPage === 'index') {
-				// 注册页已注册，跳转到仪表盘页
+				
 				window.location.href = 'dashboard.html';
 			} else if (currentPage === 'dashboard') {
-				// 仪表盘页或首页已注册，什么都不做
+				
 				return;
 			}
 		}
@@ -199,13 +192,13 @@ async function checkMembershipStatus(address, currentPage) {
 }
 
 function showDashboardContent() {
-	// 隐藏骨架屏
+	
 	const skeleton = document.querySelector('.skeleton-content');
 	if (skeleton) {
 		skeleton.classList.add('fade-out');
 		setTimeout(() => skeleton.style.display = 'none', 500);
 	}
-	// 显示真实内容
+	
 	const dashboardContent = document.querySelector('.dashboard-main-content');
 	if (dashboardContent) {
 		dashboardContent.classList.remove('invisible');
