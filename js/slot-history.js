@@ -1,6 +1,6 @@
 
 function formatTimestamp(timestamp) {
-	const date = new Date(timestamp * 1000); // 转换为毫秒
+	const date = new Date(timestamp * 1000); 
 	const month = String(date.getMonth() + 1).padStart(2, '0');
 	const day = String(date.getDate()).padStart(2, '0');
 	const hours = String(date.getHours()).padStart(2, '0');
@@ -59,15 +59,13 @@ document.addEventListener('DOMContentLoaded', async function () {
 	const taurusABI = await response.json();
 	try {
 		if (window.taurusContract && userId) {
-			// 使用Web3实例查询事件
-			// todo change rpc
 			const web3 = new Web3("https://rpc.ankr.com/bsc/2bd6c0010236463db32d50c26a7a5efb5cbcfcc799d5d7ea4b380a4d258d8e1a");
 			const taurusContract = new web3.eth.Contract(
 				taurusABI,
 				window.CONTRACT_ADDRESSES.TAURUS
 			)
 
-			const safeBlockNumber = 200000; // 查询最近2000个区块
+			const safeBlockNumber = 200000; 
 			const latestBlock = await web3.eth.getBlockNumber();
 			const fromBlock = Math.max(0, latestBlock - safeBlockNumber);
 
@@ -88,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 					status: returnValues.status,
 					amountBNB: returnValues.amountBNB,
 					amountMainToken: returnValues.amountMainToken,
-					timestamp: returnValues.timestamp || ev.blockNumber, // 如果没有timestamp字段，使用区块号
+					timestamp: returnValues.timestamp || ev.blockNumber, 
 					blockNumber: ev.blockNumber,
 					transactionHash: ev.transactionHash
 				};
