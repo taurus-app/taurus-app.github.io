@@ -93,8 +93,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 			});
 
 			setTimeout(() => {
-				console.log(123);
-
 				showDashboardContent();
 			}, 500);
 
@@ -103,6 +101,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 		}
 	} catch (e) {
 		console.log('Error loading rewards:', e);
+		showDashboardContent();
 		window.showToast && window.showToast('Failed to load reward history', 'error');
 	}
 

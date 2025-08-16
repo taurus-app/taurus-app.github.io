@@ -6,6 +6,7 @@ const BSC_CHAIN_ID = '0x38'; // 56
 // Global Web3 and contract instances
 let web3Instance = null;
 let taurusContract = null;
+let nodeContract = null;
 
 // Initialize Web3 and contract
 async function initializeWeb3AndContract() {
@@ -31,9 +32,20 @@ async function initializeWeb3AndContract() {
 			window.CONTRACT_ADDRESSES.TAURUS
 		);
 
+		// Load node contract ABI
+		const nodeResponse = await fetch('assets/abi/nodeabi.json');
+		const nodeABI = await nodeResponse.json();
+
+		// Initialize Node contract
+		nodeContract = new web3Instance.eth.Contract(
+			nodeABI,
+			window.CONTRACT_ADDRESSES.NODE
+		);
+
 		// Mount to window for global access
 		window.web3 = web3Instance;
 		window.taurusContract = taurusContract;
+		window.nodeContract = nodeContract;
 
 		console.log('Web3 and Taurus contract initialized successfully');
 		return true;
@@ -52,6 +64,11 @@ function getWeb3() {
 // Get Taurus contract instance
 function getTaurusContract() {
 	return taurusContract;
+}
+
+// Get Node contract instance
+function getNodeContract() {
+	return nodeContract;
 }
 
 async function switchToBSC() {

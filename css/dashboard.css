@@ -469,6 +469,121 @@ body::before {
     transform: scale(1.1);
 }
 
+/* Node Section Styles */
+.node-section {
+    margin: 1.1rem 0 0.5rem 0;
+    padding: 1.2rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.node-title {
+    color: #F0B90B;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0.2rem 0.4rem rgba(240, 185, 11, 0.3);
+    letter-spacing: 0.02em;
+}
+
+.node-info {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	margin-bottom: 0.8rem;
+}
+
+#nodeStatus {
+    font-size: 0.9rem;
+    color: #FAF6F6;
+    font-weight: 500;
+}
+
+.node-type {
+    font-size: 0.8rem;
+    color: #F0B90B;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+}
+
+.join-node-btn {
+    background: linear-gradient(135deg, rgba(240, 185, 11, 0.15) 0%, rgba(240, 185, 11, 0.08) 100%);
+    border: 1px solid rgba(240, 185, 11, 0.3);
+    color: #F0B90B;
+    padding: 0.8rem 2rem;
+    border-radius: 0.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 8rem;
+    text-align: center;
+}
+
+.join-node-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(240, 185, 11, 0.25) 0%, rgba(240, 185, 11, 0.15) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 0.3rem 0.8rem rgba(240, 185, 11, 0.2);
+}
+
+.join-node-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 0.1rem 0.3rem rgba(240, 185, 11, 0.1);
+}
+
+.join-node-btn:disabled {
+    background: linear-gradient(135deg, rgba(128, 128, 128, 0.1) 0%, rgba(128, 128, 128, 0.05) 100%);
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    color: rgba(250, 246, 246, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.node-requirements {
+	font-size: 0.8rem;
+	color: rgba(250, 246, 246, 0.7);
+	text-align: center;
+	margin-top: 0.5rem;
+	padding: 0.5rem;
+	border-radius: 0.5rem;
+	background: rgba(30, 43, 38, 0.3);
+	border: 1px solid rgba(240, 185, 11, 0.1);
+}
+
+/* Node Stats Styles */
+.node-stats {
+	margin-bottom: 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+.node-stat-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.8rem;
+}
+
+.node-stat-label {
+	color: #F0B90B;
+	font-weight: 500;
+}
+
+.node-stat-value {
+	color: #F0B90B;
+	font-weight: 600;
+}
+
+.node-button-container {
+	display: flex;
+	justify-content: center;
+	margin-top: 0.5rem;
+}
+
 /* Slot Section */
 .slot-section {
     margin-top: 0.5rem;
@@ -775,6 +890,28 @@ body::before {
         padding: 1.2rem;
         margin-bottom: 1.5rem;
         border-radius: 1.2rem;
+    }
+    
+    .node-status {
+        flex-direction: column;
+        gap: 0.8rem;
+        align-items: stretch;
+    }
+    
+    .join-node-btn {
+        width: 100%;
+        padding: 0.8rem 2rem;
+        font-size: 1rem;
+        min-width: 8rem;
+    }
+    
+    .node-title {
+        margin-bottom: 0.8rem;
+    }
+    
+    .node-requirements {
+        font-size: 0.75rem;
+        padding: 0.4rem;
     }
     
     .slot-dot {

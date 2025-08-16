@@ -4,25 +4,36 @@ let userData = {
 	inviterId: '--',
 	partnerCount: '--',
 	inviteLink: '',
-	slots: [], 
-	isBlocked: false
+	slots: [],
+	isBlocked: false,
+	nodeEligible: false,
+	nodeType: null,
+	isT3Node: false,
+	isT6Node: false,
+	taurusTokenAddress: null,
+	taurusContract: null,
+	requiredAmount: null,
+	approvedAmount: null,
+	needsApproval: false
 };
 
 document.addEventListener('DOMContentLoaded', async function () {
-	
+
 	let address = '';
 	if (window.getCurrentAddress) {
 		address = await window.getCurrentAddress();
 		document.getElementById('walletAddress').value = formatAddress(address);
 	}
 
-	
+
 	if (window.checkMembershipStatus && address) {
 		window.checkMembershipStatus(address, 'dashboard');
 	}
 
-	
+
 	await initializeWeb3AndContract();
+	console.log('Node Contract Address: ', CONTRACT_ADDRESSES.NODE);
+	
 	try {
 		if (window.taurusContract && address) {
 			const info = await window.taurusContract.methods.getFullUser(address).call();
@@ -31,8 +42,13 @@ document.addEventListener('DOMContentLoaded', async function () {
 			userData.inviterId = info.inviterId || '--';
 			userData.partnerCount = info.invitedCount || '--';
 			userData.inviteLink = `https://taurus-app.net/register?invite=${userData.userId}`;
-			userData.isBlocked = info.isBlocked === true || info.isBlocked === 'true'; 
+			userData.isBlocked = info.isBlocked === true || info.isBlocked === 'true';
 			userData.slots = await getUserSlots(userData.userId, userData.vipLevel);
+
+			// Check node eligibility
+			await checkNodeEligibility(address);
+			// Get and display node stats
+			await loadNodeStats();
 		}
 	} catch (err) {
 		window.showToast && window.showToast('Failed to load user info', 'error');
@@ -45,10 +61,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 	document.getElementById('partnerCount').innerHTML = `${t('partners.myPartners')}: <span style="font-weight: bold;">${userData.partnerCount}</span>`;
 	document.getElementById('inviteLink').textContent = userData.inviteLink;
 
-	
+
 	renderSlots(userData.slots);
 
-	
+
 	document.getElementById('copyInviteBtn').onclick = function () {
 		navigator.clipboard.writeText(userData.inviteLink);
 		if (window.showToast) window.showToast(t('register.copySuccess'), 'success');
@@ -59,15 +75,20 @@ document.addEventListener('DOMContentLoaded', async function () {
 		window.location.href = 'partners.html';
 	};
 
-	
+	// Node participation button
+	document.getElementById('joinNodeBtn').onclick = function () {
+		joinNode();
+	};
+
+
 	const slots = userData.slots;
-	
+
 	setTimeout(() => {
 		showDashboardContent();
 	}, 500);
 	document.querySelectorAll('.slot-view-btn').forEach(function (btn, idx) {
 		btn.onclick = function () {
-			
+
 			const slotLevel = slots[idx].level;
 			window.location.href = `slot-history.html?vip=${slotLevel}`;
 		};
@@ -93,9 +114,8 @@ async function getUserSlots(userId, vipLevel) {
 		for (let level = 1; level <= vipLevel; level++) {
 			try {
 				const slotData = await window.taurusContract.methods.getUserSlot(userId, level).call();
-				
+
 				const slotArr = [];
-				console.log(slotData);
 				if (slotData.point1 && slotData.point1 !== '0' && slotData.point1 !== 0) {
 					const p1 = parsePoint(slotData.point1);
 					slotArr.push({ type: p1.type, id: p1.id });
@@ -104,7 +124,7 @@ async function getUserSlots(userId, vipLevel) {
 					const p2 = parsePoint(slotData.point2);
 					slotArr.push({ type: p2.type, id: p2.id });
 				}
-				
+
 				while (slotArr.length < 3) {
 					slotArr.push({ type: 'empty' });
 				}
@@ -115,7 +135,7 @@ async function getUserSlots(userId, vipLevel) {
 					slots: slotArr
 				});
 			} catch (e) {
-				
+
 				slots.push({
 					level,
 					amount: window.getVipAmount ? window.getVipAmount(level) : '',
@@ -125,7 +145,7 @@ async function getUserSlots(userId, vipLevel) {
 			}
 		}
 	} catch (err) {
-		
+
 		window.showToast && window.showToast(t('dashboard.failed'), 'error');
 	}
 	return slots;
@@ -148,7 +168,7 @@ function renderSlots(slots) {
 		let rightContent = '';
 		if (!isLocked) {
 			if (level === currentVip && userData.isBlocked) {
-				
+
 				if (showView) {
 					rightContent = `<span class="vip-locked" title="Blocked"><span class="vip-lock-icon">🔐</span></span><button class="slot-view-btn" data-level="${level}">${t('dashboard.view')}</button>`;
 				} else {
@@ -222,7 +242,7 @@ function renderSlots(slots) {
 						btn.textContent = t('upgrade');
 						return;
 					}
-					
+
 					let balance = 0;
 					try {
 						if (window.Web3) {
@@ -244,7 +264,7 @@ function renderSlots(slots) {
 						btn.textContent = t('upgrade');
 						return;
 					}
-					
+
 					try {
 						window.showToast && window.showToast('Waiting for wallet signature...', 'info');
 						btn.textContent = 'Upgrading...';
@@ -286,4 +306,269 @@ function renderSlots(slots) {
 			}
 		});
 	}, 500);
+}
+
+// Node related functions
+async function checkNodeEligibility(address) {
+	if (!window.nodeContract || !address) {
+		updateNodeStatus(t('dashboard.nodeNotEligible'), false, null);
+		return;
+	}
+
+	try {
+		// Get Taurus token address and required amounts
+		const taurusTokenAddress = await window.nodeContract.methods.taurusToken().call();
+		const t3RequiredAmount = await window.nodeContract.methods.t3RequiredAmount().call();
+		const t6RequiredAmount = await window.nodeContract.methods.t6RequiredAmount().call();
+
+		userData.taurusTokenAddress = taurusTokenAddress;
+		userData.taurusContract = new window.web3.eth.Contract(JSON.parse(await fetch('assets/abi/erc20.json').then(r => r.text())), taurusTokenAddress);
+
+		// Use checkEligibility method to get all node information
+		const eligibility = await window.nodeContract.methods.checkEligibility(address).call();
+
+		const {
+			canJoinT3,
+			canJoinT6,
+			hasJoinedT3,
+			hasJoinedT6,
+			hasEnoughForT3,
+			hasEnoughForT6,
+			remainingSlots
+		} = eligibility;
+
+		userData.isT3Node = hasJoinedT3;
+		userData.isT6Node = hasJoinedT6;
+
+		// If already a node, show status
+		if (userData.vipLevel >= 6) {
+			document.getElementById('nodeTitle').textContent = t('dashboard.superNodeParticipation');
+		}
+
+		if (hasJoinedT3) {
+			updateNodeStatus(t('dashboard.nodeJoined'), false, null);
+			return;
+		} else if (hasJoinedT6) {
+			updateNodeStatus(t('dashboard.superNodeJoined'), false, null);
+			return;
+		}
+
+		// Check eligibility based on contract response
+		let eligible = false;
+		let nodeType = null;
+		let requiredAmount = null;
+
+		if (canJoinT3) {
+			eligible = true;
+			nodeType = 'T3T6';
+			userData.nodeType = 'T3T6';
+			requiredAmount = t3RequiredAmount;
+		} else if (canJoinT6) {
+			eligible = true;
+			nodeType = 'T6Plus';
+			userData.nodeType = 'T6Plus';
+			requiredAmount = t6RequiredAmount;
+		}
+
+		userData.nodeEligible = eligible;
+		userData.requiredAmount = requiredAmount;
+
+		if (eligible) {
+			// Check approval status
+			await checkApprovalStatus(address, requiredAmount);
+		} else {
+			updateNodeStatus(t('dashboard.nodeNotEligible'), false, null);
+		}
+
+	} catch (error) {
+		console.error('Error checking node eligibility:', error);
+		updateNodeStatus(t('dashboard.nodeNotEligible'), false, null);
+	}
+}
+
+async function loadNodeStats() {
+	try {
+		if (!window.nodeContract) {
+			return;
+		}
+
+		const stats = await window.nodeContract.methods.getNodeStats().call();
+
+		const currentNodes = stats.currentNodes;
+		const remainingSlots = stats.remainingSlots;
+
+		// Update DOM elements
+		const currentNodesElement = document.getElementById('currentNodes');
+		const remainingSlotsElement = document.getElementById('remainingSlots');
+
+		if (currentNodesElement) {
+			currentNodesElement.textContent = currentNodes;
+		}
+
+		if (remainingSlotsElement) {
+			remainingSlotsElement.textContent = remainingSlots;
+		}
+
+	} catch (error) {
+		console.error('Error loading node stats:', error);
+	}
+}
+
+async function checkApprovalStatus(address, requiredAmount) {
+	try {
+		// Check current allowance
+		const allowance = await userData.taurusContract.methods.allowance(address, window.CONTRACT_ADDRESSES.NODE).call();
+		userData.approvedAmount = allowance;
+
+		// Check if approval is needed
+		const needsApproval = BigInt(allowance) < BigInt(requiredAmount);
+		userData.needsApproval = needsApproval;
+
+		if (needsApproval) {
+			// Need approval
+			updateNodeStatus(t('dashboard.nodeEligible'), true, null, true);
+		} else {
+			// Already approved
+			updateNodeStatus(t('dashboard.nodeEligible'), true, null, false);
+		}
+	} catch (error) {
+		console.error('Error checking approval status:', error);
+		updateNodeStatus(t('dashboard.nodeNotEligible'), false, null);
+	}
+}
+
+function updateNodeStatus(statusText, enableButton, nodeTypeText, needsApproval = false) {
+	const statusElement = document.getElementById('nodeStatus');
+	const buttonElement = document.getElementById('joinNodeBtn');
+	const typeElement = document.getElementById('nodeType');
+
+	if (statusElement) {
+		statusElement.textContent = statusText;
+	}
+
+	if (buttonElement) {
+		if (userData.isT3Node || userData.isT6Node) {
+			buttonElement.disabled = true;
+		} else {
+			buttonElement.disabled = !enableButton;
+		}
+
+		// 根据授权状态设置按钮文字
+		if (enableButton && !userData.isT3Node && !userData.isT6Node) {
+			if (needsApproval) {
+				buttonElement.textContent = t('dashboard.approveTaurus');
+			} else {
+				buttonElement.textContent = t('dashboard.joinNode');
+			}
+		}
+	}
+
+	if (typeElement) {
+		typeElement.textContent = nodeTypeText || '';
+	}
+}
+
+async function joinNode() {
+	if (!window.nodeContract || !userData.nodeEligible || userData.nodeType === null) {
+		window.showToast && window.showToast(t('dashboard.nodeFailed'), 'error');
+		return;
+	}
+
+	const address = await window.getCurrentAddress();
+	if (!address) {
+		window.showToast && window.showToast('Please connect your wallet.', 'error');
+		return;
+	}
+
+	const buttonElement = document.getElementById('joinNodeBtn');
+	if (buttonElement) {
+		buttonElement.disabled = true;
+	}
+
+	// Check if approval is needed
+	if (userData.needsApproval) {
+		await approveTaurus(address, buttonElement);
+	} else {
+		await joinNodeAction(address, buttonElement);
+	}
+}
+
+async function approveTaurus(address, buttonElement) {
+	try {
+		window.showToast && window.showToast('Waiting for wallet signature...', 'info');
+
+		userData.taurusContract.methods.approve(window.CONTRACT_ADDRESSES.NODE, userData.requiredAmount).send({ from: address })
+			.on('transactionHash', hash => {
+				window.showToast && window.showToast('Transaction sent, waiting for confirmation...', 'info');
+			})
+			.on('receipt', receipt => {
+				window.showToast && window.showToast('Approval successful!', 'success');
+				// Update approval status and button text
+				setTimeout(() => {
+					checkNodeEligibility(address);
+				}, 1000);
+			})
+			.on('error', error => {
+				if (error && error.code === 4001) {
+					window.showToast && window.showToast('Transaction rejected by user.', 'error');
+				} else {
+					window.showToast && window.showToast('Approval failed: ' + (error && error.message ? error.message : 'Unknown error'), 'error');
+				}
+				if (buttonElement) {
+					buttonElement.disabled = false;
+				}
+			});
+	} catch (error) {
+		console.error('Error approving Taurus:', error);
+		window.showToast && window.showToast('Approval failed: ' + (error && error.message ? error.message : 'Unknown error'), 'error');
+		if (buttonElement) {
+			buttonElement.disabled = false;
+		}
+	}
+}
+
+async function joinNodeAction(address, buttonElement) {
+	try {
+		window.showToast && window.showToast('Waiting for wallet signature...', 'info');
+
+		let method;
+		if (userData.nodeType === 'T3T6') {
+			method = window.nodeContract.methods.joinT3Node();
+		} else if (userData.nodeType === 'T6Plus') {
+			method = window.nodeContract.methods.joinT6Node();
+		} else {
+			throw new Error('Invalid node type');
+		}
+
+		method.send({ from: address })
+			.on('transactionHash', hash => {
+				window.showToast && window.showToast('Transaction sent, waiting for confirmation...', 'info');
+			})
+			.on('receipt', receipt => {
+				window.showToast && window.showToast(t('dashboard.nodeJoined'), 'success');
+				if (buttonElement) {
+					buttonElement.disabled = true;
+				}
+				// Update node status after successful join
+				setTimeout(() => {
+					checkNodeEligibility(address);
+				}, 1000);
+			})
+			.on('error', error => {
+				if (error && error.code === 4001) {
+					window.showToast && window.showToast('Transaction rejected by user.', 'error');
+				} else {
+					window.showToast && window.showToast(t('dashboard.nodeFailed') + ': ' + (error && error.message ? error.message : 'Unknown error'), 'error');
+				}
+				if (buttonElement) {
+					buttonElement.disabled = false;
+				}
+			});
+	} catch (error) {
+		console.error('Error joining node:', error);
+		window.showToast && window.showToast(t('dashboard.nodeFailed') + ': ' + (error && error.message ? error.message : 'Unknown error'), 'error');
+		if (buttonElement) {
+			buttonElement.disabled = false;
+		}
+	}
 } 

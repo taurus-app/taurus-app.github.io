@@ -67,6 +67,28 @@
 					</div>
 					<div class="card-decoration card-decoration-bottom"></div>
 				</div>
+				<div class="node-section card-blur">
+					<div class="card-decoration card-decoration-top"></div>
+					<div class="node-title" id="nodeTitle" data-i18n="dashboard.nodeParticipation">Node Participation</div>
+					<div class="node-info">
+						<span id="nodeStatus" data-i18n="dashboard.checkingEligibility">Checking eligibility...</span>
+						<span id="nodeType" class="node-type"></span>
+					</div>
+					<div class="node-stats">
+						<div class="node-stat-item">
+							<span class="node-stat-label" data-i18n="dashboard.currentNodes">Current Nodes:</span>
+							<span class="node-stat-value" id="currentNodes">--</span>
+						</div>
+						<div class="node-stat-item">
+							<span class="node-stat-label" data-i18n="dashboard.remainingSlots">Remaining Slots:</span>
+							<span class="node-stat-value" id="remainingSlots">--</span>
+						</div>
+					</div>
+					<div class="node-button-container">
+						<button class="join-node-btn" id="joinNodeBtn" disabled data-i18n="dashboard.joinNode">Join Node</button>
+					</div>
+					<div class="card-decoration card-decoration-bottom"></div>
+				</div>
 				<div class="slot-section card-blur">
 					<div class="card-decoration card-decoration-top"></div>
 					<div id="slotList"></div>
@@ -88,6 +110,11 @@
 				</div>
 			</div>
 			<div class="skeleton-content">
+				<div class="skeleton-card">
+					<div class="skeleton-line"></div>
+					<div class="skeleton-line"></div>
+					<div class="skeleton-line"></div>
+				</div>
 				<div class="skeleton-card">
 					<div class="skeleton-line"></div>
 					<div class="skeleton-line"></div>
